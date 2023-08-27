@@ -13,8 +13,6 @@ import (
 )
 
 const dburi = "mongodb://localhost:27017"
-const dbname = "Funduqi-db"
-const userColl = "users"
 
 var config = fiber.Config{
 	// Override default error handler
