@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/godazz/Funduqi/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -15,12 +16,15 @@ type RoomStore interface {
 type MongoRoomStore struct {
 	client *mongo.Client
 	coll   *mongo.Collection
+
+	HotelStore
 }
 
-func NewRoomStore(client *mongo.Client, dbname string) *MongoRoomStore {
+func NewRoomStore(client *mongo.Client, hotelStore HotelStore) *MongoRoomStore {
 	return &MongoRoomStore{
-		client: client,
-		coll:   client.Database(dbname).Collection("rooms"),
+		client:     client,
+		coll:       client.Database(DBNAME).Collection("rooms"),
+		HotelStore: hotelStore,
 	}
 }
 
@@ -30,5 +34,11 @@ func (s *MongoRoomStore) InsertRoom(ctx context.Context, room *types.Room) (*typ
 		return nil, err
 	}
 	room.ID = resp.InsertedID.(primitive.ObjectID)
+
+	filter := bson.M{"_id": room.HotelID}
+	update := bson.M{"$push": bson.M{"rooms": room.ID}}
+	if err := s.HotelStore.UpdateHotel(ctx, filter, update); err != nil {
+		return nil, err
+	}
 	return room, nil
 }

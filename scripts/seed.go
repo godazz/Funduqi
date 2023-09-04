@@ -7,6 +7,7 @@ import (
 
 	"github.com/godazz/Funduqi/db"
 	"github.com/godazz/Funduqi/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,13 +21,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
 
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewRoomStore(client, db.DBNAME)
+	hotelStore := db.NewMongoHotelStore(client)
+	roomStore := db.NewRoomStore(client, hotelStore)
 
 	hotel := types.Hotel{
 		Name:     "Ramses Hilton",
 		Location: "Cairo",
+		Rooms:    []primitive.ObjectID{},
 	}
 	rooms := []types.Room{
 		{
