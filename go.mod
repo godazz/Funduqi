@@ -1,6 +1,6 @@
 module github.com/godazz/Funduqi
 
-go 1.21
+go 1.21.1
 
 require (
 	github.com/gofiber/fiber/v2 v2.48.0
