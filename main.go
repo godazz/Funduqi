@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/godazz/Funduqi/api"
+	"github.com/godazz/Funduqi/api/middleware"
 	"github.com/godazz/Funduqi/db"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -41,10 +42,15 @@ func main() {
 		}
 		userHandler  = api.NewUserHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
+		authHandler  = api.NewAuthHandler(userStore)
 
 		app   = fiber.New(config)
-		apiv1 = app.Group("/api/v1")
+		auth  = app.Group("/api")
+		apiv1 = app.Group("/api/v1", middleware.JWTAuthentication)
 	)
+
+	// auth
+	auth.Post("/auth", authHandler.HandleAutheticate)
 
 	// users handlers
 	apiv1.Post("/user", userHandler.HandlePostUser)
